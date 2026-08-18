@@ -1,5 +1,7 @@
 # Transformer GPU Visual Simulator
 
+> 🖥️ **在线体验（无需安装，浏览器直接打开）**：<https://jinzhichengliang.github.io/transformer-gpu-visual-simulator/>
+
 **把 Transformer 的每一步计算，放到 GPU 的视角下看清。**
 
 一个面向教学的交互式可视化工具：从模型算子、数学运算，一路追踪到 GPU 的 Kernel、内存与 Tensor Core 行为，帮助初学者建立"模型计算 → GPU 执行"的完整心智模型。
