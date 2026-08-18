@@ -1,0 +1,124 @@
+.gpu-view {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.gpu-view-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.gpu-view-title h3 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.gpu-view-note {
+  font-size: 10px;
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+.gpu-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.gpu-box {
+  fill: var(--panel-2);
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+
+.gpu-caption {
+  fill: var(--text-dim);
+  font-size: 10px;
+}
+
+.sm-box {
+  fill: var(--panel-3);
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  transition: stroke 0.2s;
+}
+
+.sm-box.sm-active {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.sm-title {
+  fill: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--mono);
+}
+
+.sm-block-label {
+  fill: var(--text-dim);
+  font-size: 9px;
+  font-family: var(--mono);
+}
+
+.gpu-unit {
+  fill: var(--panel);
+  stroke: var(--border);
+  stroke-width: 0.8;
+  transition: fill 0.2s, stroke 0.2s;
+}
+
+.gpu-unit-text {
+  fill: var(--text-dim);
+  font-size: 9px;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.gpu-unit.unit-active {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  animation: unit-pulse 0.9s ease-in-out infinite;
+}
+
+.gpu-unit.unit-active + .gpu-unit-text {
+  fill: var(--text);
+  font-weight: 600;
+}
+
+.gpu-unit.warp.unit-active {
+  fill: rgba(88, 166, 255, 0.3);
+}
+
+.gpu-unit.tensor-core.unit-active {
+  fill: rgba(255, 122, 89, 0.35);
+  stroke: #ff7a59;
+}
+
+.gpu-unit.shared-memory.unit-active {
+  fill: rgba(63, 185, 80, 0.3);
+  stroke: #3fb950;
+}
+
+.gpu-unit.register.unit-active {
+  fill: rgba(210, 153, 34, 0.3);
+  stroke: #d29922;
+}
+
+@keyframes unit-pulse {
+  0%,
+  100% {
+    stroke-opacity: 1;
+  }
+  50% {
+    stroke-opacity: 0.5;
+  }
+}

@@ -1,0 +1,188 @@
+/* App 布局样式 */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  min-height: 100svh;
+  max-width: 1720px;
+  margin: 0 auto;
+}
+
+/* ---------- Header ---------- */
+
+.app-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 4px 2px;
+}
+
+.app-title h1 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.3px;
+  background: linear-gradient(90deg, #58a6ff, #ff7a59);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.app-version {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.app-config {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+.config-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.config-group-label {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.config-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.config-buttons button {
+  padding: 4px 10px;
+  font-size: 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.config-buttons button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.config-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* ---------- 主区域三栏 ---------- */
+
+.app-main {
+  display: grid;
+  grid-template-columns: minmax(300px, 1.15fr) minmax(360px, 1.4fr) minmax(260px, 0.9fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.panel-left,
+.panel-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.panel-center {
+  min-width: 0;
+}
+
+@media (max-width: 1200px) {
+  .app-main {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .panel-right {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- 编译层级视图（V0.4） ---------- */
+
+.app-compiler {
+  width: 100%;
+}
+
+/* ---------- Kernel 时间轴（V0.5） ---------- */
+
+.app-kernel-timeline {
+  width: 100%;
+}
+
+/* ---------- 性能分析（V0.6） ---------- */
+
+.app-perf {
+  width: 100%;
+}
+
+/* ---------- Architecture Playground（V0.7） ---------- */
+
+.app-playground {
+  width: 100%;
+}
+
+/* ---------- 真实 trace 配置区（V0.5） ---------- */
+
+.realtrace-config {
+  min-width: 260px;
+}
+
+.realtrace-error {
+  font-size: 11px;
+  color: #f85149;
+  line-height: 1.4;
+}
+
+/* ---------- 底部：解释 + 时间线 ---------- */
+
+.app-bottom {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(300px, 1.6fr);
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .app-bottom {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Footer ---------- */
+
+.app-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 10.5px;
+  color: var(--text-dim);
+  opacity: 0.75;
+  padding: 2px 4px 8px;
+}

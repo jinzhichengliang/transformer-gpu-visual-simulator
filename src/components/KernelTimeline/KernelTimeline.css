@@ -1,0 +1,84 @@
+.kernel-timeline {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+}
+
+.kernel-timeline-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.kernel-timeline-header h3 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.kt-provenance {
+  font-size: 10.5px;
+  color: var(--accent);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 2px 8px;
+  background: var(--panel-2);
+}
+
+.kt-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.kt-gridline {
+  stroke: var(--border);
+  stroke-width: 0.5;
+  stroke-dasharray: 2 3;
+}
+
+.kt-tick-label {
+  fill: var(--text-dim);
+  font-size: 8.5px;
+}
+
+.kt-kernel-label {
+  fill: var(--text-dim);
+  font-size: 9.5px;
+  font-family: var(--mono);
+}
+
+.kt-bar {
+  fill: rgba(88, 166, 255, 0.45);
+  stroke: var(--accent);
+  stroke-width: 0.8;
+  cursor: pointer;
+  transition: fill 0.15s;
+}
+
+.kt-bar:hover {
+  fill: rgba(88, 166, 255, 0.7);
+}
+
+.kt-bar-active {
+  fill: var(--accent);
+  stroke: var(--text);
+  stroke-width: 1.2;
+}
+
+.kt-bar-duration {
+  fill: var(--text);
+  font-size: 8px;
+  font-family: var(--mono);
+  pointer-events: none;
+}
+
+.kt-axis-label {
+  fill: var(--text-dim);
+  font-size: 9px;
+}

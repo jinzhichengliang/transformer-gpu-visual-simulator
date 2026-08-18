@@ -1,0 +1,86 @@
+.control-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.control-bar button {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.control-bar button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--panel-3);
+}
+
+.control-bar button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.control-bar button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.control-bar button.primary:hover {
+  background: var(--accent-strong);
+}
+
+.control-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.control-progress input[type='range'] {
+  flex: 1;
+  accent-color: var(--accent);
+}
+
+.control-step-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.control-speed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.speed-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.speed-buttons button {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.speed-buttons button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}

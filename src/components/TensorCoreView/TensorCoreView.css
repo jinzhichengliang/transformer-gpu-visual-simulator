@@ -1,0 +1,143 @@
+.tensor-core-view {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: border-color 0.2s;
+}
+
+.tensor-core-view.tc-active {
+  border-color: #ff7a59;
+}
+
+.tc-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tc-title h3 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.tc-formula {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: #ff7a59;
+}
+
+.tc-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tc-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tc-fragment {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  font-size: 12px;
+  color: var(--text);
+  font-family: var(--mono);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 130px;
+  transition: all 0.2s;
+}
+
+.tc-fragment span {
+  font-size: 9px;
+  color: var(--text-dim);
+  font-family: inherit;
+}
+
+.tc-frag-active {
+  border-color: #ff7a59;
+  background: rgba(255, 122, 89, 0.15);
+  box-shadow: 0 0 12px rgba(255, 122, 89, 0.25);
+}
+
+.tc-core {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tc-unit {
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--panel-3);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: all 0.2s;
+}
+
+.tc-unit span {
+  font-size: 10px;
+  color: #ff7a59;
+  font-family: var(--mono);
+}
+
+.tc-unit-firing {
+  border-color: #ff7a59;
+  background: rgba(255, 122, 89, 0.2);
+  animation: tc-fire 0.8s ease-in-out infinite;
+}
+
+@keyframes tc-fire {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(255, 122, 89, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 122, 89, 0.6);
+  }
+}
+
+.tc-arrow {
+  font-size: 20px;
+  color: #ff7a59;
+  font-weight: 700;
+}
+
+.tc-arrow-down {
+  font-size: 16px;
+  color: #ff7a59;
+  font-weight: 700;
+  text-align: center;
+}
+
+.tc-acc-output {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.tc-note {
+  margin: 10px 0 0;
+  font-size: 10.5px;
+  color: var(--text-dim);
+  opacity: 0.75;
+  line-height: 1.4;
+}

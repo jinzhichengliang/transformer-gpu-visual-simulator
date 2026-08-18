@@ -1,0 +1,105 @@
+.matrix-view {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.matrix-view-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.matrix-view-title h3 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.matrix-formula {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+}
+
+.matrix-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.matrix-op {
+  font-size: 22px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.single-matrix {
+  transition: filter 0.2s;
+}
+
+.single-matrix-emphasized .matrix-body {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.matrix-svg {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  display: block;
+}
+
+.matrix-body {
+  fill: var(--panel-2);
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.matrix-grid-line {
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 0.5;
+}
+
+.matrix-tile {
+  fill: transparent;
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 0.8;
+  stroke-dasharray: 3 2;
+}
+
+.matrix-tile-active {
+  fill: rgba(88, 166, 255, 0.45);
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  stroke-dasharray: none;
+  animation: tile-pulse 1s ease-in-out infinite;
+}
+
+@keyframes tile-pulse {
+  0%,
+  100% {
+    fill-opacity: 0.35;
+  }
+  50% {
+    fill-opacity: 0.6;
+  }
+}
+
+.matrix-label {
+  fill: var(--text);
+  font-size: 11px;
+  text-anchor: middle;
+  font-family: var(--mono);
+}
+
+.matrix-tile-info {
+  fill: var(--text-dim);
+  font-size: 8px;
+  text-anchor: middle;
+}

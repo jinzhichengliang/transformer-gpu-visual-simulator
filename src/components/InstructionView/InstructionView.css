@@ -1,0 +1,176 @@
+.instruction-view {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+}
+
+.iv-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.iv-header h3 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.iv-provenance {
+  font-size: 10.5px;
+  color: var(--accent);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 2px 8px;
+  background: var(--panel-2);
+}
+
+.iv-disclaimer {
+  font-size: 10.5px;
+  color: var(--text-dim);
+  background: var(--panel-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.iv-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.iv-legend-item {
+  font-size: 10px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--panel-2);
+  color: var(--text-dim);
+}
+
+.iv-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.iv-warp {
+  flex: 1 1 320px;
+  min-width: 300px;
+}
+
+.iv-warp-title {
+  font-size: 12px;
+  color: var(--text);
+  font-family: var(--mono);
+  margin-bottom: 4px;
+}
+
+.iv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10.5px;
+}
+
+.iv-table th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-dim);
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+}
+
+.iv-row {
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.iv-row:hover {
+  background: var(--panel-2);
+}
+
+.iv-row-active {
+  background: rgba(88, 166, 255, 0.18) !important;
+  outline: 1px solid var(--accent);
+}
+
+.iv-row td {
+  padding: 2.5px 6px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  color: var(--text);
+  vertical-align: top;
+}
+
+.iv-col-pc {
+  width: 52px;
+  color: var(--text-dim) !important;
+}
+
+.iv-col-opcode {
+  width: 150px;
+}
+
+.iv-col-operands {
+  color: var(--text-dim) !important;
+  word-break: break-all;
+}
+
+.iv-col-category {
+  width: 92px;
+}
+
+.iv-badge {
+  display: inline-block;
+  font-size: 9.5px;
+  padding: 1px 7px;
+  border-radius: 9px;
+  border: 1px solid var(--border-strong);
+  background: var(--panel-2);
+  font-family: inherit;
+}
+
+/* ---------- 指令类别着色 ---------- */
+
+.cat-global-memory .iv-badge,
+.iv-legend-item.cat-global-memory {
+  color: #79c0ff;
+}
+.cat-shared-memory .iv-badge,
+.iv-legend-item.cat-shared-memory {
+  color: #7ee787;
+}
+.cat-async-copy .iv-badge,
+.iv-legend-item.cat-async-copy {
+  color: #56d4dd;
+}
+.cat-tensor-core .iv-badge,
+.iv-legend-item.cat-tensor-core {
+  color: #ff9e64;
+}
+.cat-cuda-core .iv-badge,
+.iv-legend-item.cat-cuda-core {
+  color: #d2a8ff;
+}
+.cat-sync .iv-badge,
+.iv-legend-item.cat-sync {
+  color: #ff7b72;
+}
+.cat-address-calc .iv-badge,
+.iv-legend-item.cat-address-calc {
+  color: var(--text-dim);
+}
+.cat-control .iv-badge,
+.iv-legend-item.cat-control {
+  color: #e3b341;
+}

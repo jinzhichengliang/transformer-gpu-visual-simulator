@@ -1,0 +1,128 @@
+.timeline {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.timeline-header h3 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.timeline-legend {
+  display: flex;
+  gap: 12px;
+  font-size: 10.5px;
+  color: var(--text-dim);
+}
+
+.tl-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tl-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.timeline-track {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.tl-cell {
+  flex: 1 0 6px;
+  min-width: 6px;
+  height: 22px;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.35;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.tl-cell:hover {
+  opacity: 0.8;
+}
+
+.tl-cell.tl-past {
+  opacity: 0.65;
+}
+
+.tl-cell.tl-current {
+  opacity: 1;
+  transform: scaleY(1.35);
+  outline: 1px solid var(--text);
+}
+
+.tl-setup {
+  background: #d29922;
+}
+
+.tl-schedule {
+  background: var(--accent);
+}
+
+.tl-memory {
+  background: #3fb950;
+}
+
+.tl-sync {
+  background: #a371f7;
+}
+
+.tl-compute {
+  background: #ff7a59;
+}
+
+/* V0.2：算子分段条 */
+.timeline-operators {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.tl-operator-seg {
+  min-width: 0;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--panel-2);
+  color: var(--text-dim);
+  font-size: 10px;
+  padding: 0 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tl-operator-seg:hover {
+  background: var(--panel-3);
+  color: var(--text);
+}
+
+.tl-operator-seg-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}

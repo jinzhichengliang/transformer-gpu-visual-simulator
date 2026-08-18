@@ -1,0 +1,237 @@
+.playground {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+}
+
+.playground-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.playground-header h3 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.playground-note {
+  font-size: 10px;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 2px 8px;
+  background: var(--panel-2);
+}
+
+.playground-reset {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 3px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.playground-reset:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.playground-body {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(420px, 1.6fr);
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .playground-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- 左侧滑块 ---------- */
+
+.playground-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.playground-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.15s;
+}
+
+.playground-slider-changed {
+  border-color: var(--accent);
+}
+
+.playground-slider-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.playground-slider-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.3px;
+}
+
+.playground-slider-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.playground-slider-delta {
+  font-weight: 400;
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+
+.playground-slider input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+/* ---------- 右侧结果 ---------- */
+
+.playground-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.playground-total {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.playground-total-label {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.playground-total-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.playground-total-speedup {
+  font-size: 13px;
+  font-weight: 700;
+  margin-left: auto;
+}
+
+.speedup-good {
+  color: #3fb950;
+}
+
+.speedup-bad {
+  color: #f85149;
+}
+
+.playground-impacts {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.playground-impacts-header,
+.playground-impact-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1.6fr) 0.9fr 0.9fr 0.7fr 1.2fr;
+  gap: 8px;
+  padding: 5px 10px;
+  align-items: baseline;
+}
+
+.playground-impacts-header {
+  font-size: 10px;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  background: var(--panel-3);
+}
+
+.playground-impact-row {
+  font-size: 11px;
+  border-bottom: 1px solid var(--border);
+}
+
+.playground-impact-row:last-child {
+  border-bottom: none;
+}
+
+.playground-impact-name {
+  color: var(--text);
+  font-family: var(--mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playground-impact-us {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.playground-impact-speedup {
+  font-weight: 600;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.playground-impact-bound {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.bound-flipped {
+  color: #d29922;
+}
+
+.playground-takeaways {
+  margin: 0;
+  padding: 8px 12px 8px 26px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.playground-takeaways li {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
