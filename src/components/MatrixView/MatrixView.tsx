@@ -48,9 +48,10 @@ function SingleMatrix(props: SingleMatrixProps) {
   const showGrid = size >= 0.75;
   const width = cols * size;
   const height = rows * size;
-  const pad = 26;
+  // 标签移到 HTML 渲染（不随 SVG 缩放），SVG 仅画矩阵本体
+  const pad = 6;
   const svgWidth = width + pad * 2;
-  const svgHeight = height + pad * 2 + 18;
+  const svgHeight = height + pad * 2;
 
   const tilesRow = Math.ceil(rows / tileRows);
   const tilesCol = Math.ceil(cols / tileCols);
@@ -111,17 +112,17 @@ function SingleMatrix(props: SingleMatrixProps) {
 
   return (
     <div className={`single-matrix ${emphasized ? 'single-matrix-emphasized' : ''}`}>
-      <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="matrix-svg">
+      <div className="matrix-label">{label} [{rows}×{cols}]</div>
+      <svg
+        viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="matrix-svg"
+      >
         <rect x={pad} y={pad} width={width} height={height} className="matrix-body" />
         {tileRects}
         {gridLines}
-        <text x={pad + width / 2} y={pad - 10} className="matrix-label">
-          {label} [{rows}×{cols}]
-        </text>
-        <text x={pad + width / 2} y={pad + height + 14} className="matrix-tile-info">
-          tile {tileRows}×{tileCols} → {tilesRow}×{tilesCol} 块
-        </text>
       </svg>
+      <div className="matrix-tile-info">tile {tileRows}×{tileCols} → {tilesRow}×{tilesCol} 块</div>
     </div>
   );
 }

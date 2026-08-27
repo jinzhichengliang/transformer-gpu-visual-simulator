@@ -9,7 +9,8 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: 6px 12px;
+  flex-wrap: wrap;
   margin-bottom: 8px;
 }
 
@@ -25,21 +26,25 @@
   font-family: var(--mono);
 }
 
+/* 纵向堆叠：每个矩阵独占一行、居中完整显示，
+   避免三个大矩阵横排挤压导致显示不全（大模型维度 4096+ 场景） */
 .matrix-row {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .matrix-op {
-  font-size: 22px;
+  font-size: 16px;
+  line-height: 1;
   color: var(--accent);
   font-weight: 700;
 }
 
 .single-matrix {
+  width: 100%;
+  max-width: 248px;
   transition: filter 0.2s;
 }
 
@@ -48,10 +53,11 @@
   stroke-width: 2;
 }
 
+/* 固定显示高度 + preserveAspectRatio 缩放：
+   任意宽高比（含 1×8192 这类极端形状）都在框内完整居中显示 */
 .matrix-svg {
   width: 100%;
-  max-width: 220px;
-  height: auto;
+  height: 96px;
   display: block;
 }
 
@@ -92,14 +98,16 @@
 }
 
 .matrix-label {
-  fill: var(--text);
+  color: var(--text);
   font-size: 11px;
-  text-anchor: middle;
+  text-align: center;
   font-family: var(--mono);
+  padding: 2px 0 1px;
 }
 
 .matrix-tile-info {
-  fill: var(--text-dim);
-  font-size: 8px;
-  text-anchor: middle;
+  color: var(--text-dim);
+  font-size: 9px;
+  text-align: center;
+  padding: 1px 0 2px;
 }
