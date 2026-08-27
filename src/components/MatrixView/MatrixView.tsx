@@ -40,7 +40,12 @@ interface SingleMatrixProps {
 function SingleMatrix(props: SingleMatrixProps) {
   const { label, rows, cols, tileRows, tileCols, tileSize, activeTiles, emphasized } = props;
 
-  const size = tileSize;
+  // 渲染尺寸上限（px）：大模型维度（如 4096/8192）下按此上限等比缩小，
+  // 保证矩阵整体完整显示在 Matrix View 区域内，不溢出、不变形。
+  const MAX_RENDER_SIZE = 260;
+  const size = Math.min(tileSize, MAX_RENDER_SIZE / Math.max(rows, cols, 1));
+  // 单元格过小时网格线密度过高（大维度下会渲染上万条线），不画线
+  const showGrid = size >= 0.75;
   const width = cols * size;
   const height = rows * size;
   const pad = 26;
@@ -50,11 +55,17 @@ function SingleMatrix(props: SingleMatrixProps) {
   const tilesRow = Math.ceil(rows / tileRows);
   const tilesCol = Math.ceil(cols / tileCols);
 
+  // Tile 数量过多（大维度下可达上万）时，只渲染当前激活的 Tile，
+  // 避免一次性渲染海量矩形导致卡顿；高亮定位功能不受影响。
+  const totalTiles = tilesRow * tilesCol;
+  const renderAllTiles = totalTiles <= 512;
+
   const tileRects = [];
   for (let tr = 0; tr < tilesRow; tr++) {
     for (let tc = 0; tc < tilesCol; tc++) {
       const tileLabel = `${label}[${tr},${tc}]`;
       const isActive = activeTiles.includes(tileLabel);
+      if (!renderAllTiles && !isActive) continue;
       tileRects.push(
         <rect
           key={tileLabel}
@@ -71,29 +82,31 @@ function SingleMatrix(props: SingleMatrixProps) {
   }
 
   const gridLines = [];
-  for (let c = 1; c < cols; c++) {
-    gridLines.push(
-      <line
-        key={`v${c}`}
-        x1={pad + c * size}
-        y1={pad}
-        x2={pad + c * size}
-        y2={pad + height}
-        className="matrix-grid-line"
-      />,
-    );
-  }
-  for (let r = 1; r < rows; r++) {
-    gridLines.push(
-      <line
-        key={`h${r}`}
-        x1={pad}
-        y1={pad + r * size}
-        x2={pad + width}
-        y2={pad + r * size}
-        className="matrix-grid-line"
-      />,
-    );
+  if (showGrid) {
+    for (let c = 1; c < cols; c++) {
+      gridLines.push(
+        <line
+          key={`v${c}`}
+          x1={pad + c * size}
+          y1={pad}
+          x2={pad + c * size}
+          y2={pad + height}
+          className="matrix-grid-line"
+        />,
+      );
+    }
+    for (let r = 1; r < rows; r++) {
+      gridLines.push(
+        <line
+          key={`h${r}`}
+          x1={pad}
+          y1={pad + r * size}
+          x2={pad + width}
+          y2={pad + r * size}
+          className="matrix-grid-line"
+        />,
+      );
+    }
   }
 
   return (
