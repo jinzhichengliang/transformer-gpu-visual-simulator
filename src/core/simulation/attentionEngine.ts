@@ -37,6 +37,12 @@ export interface AttentionConfig {
   tileK: number;
   numSM: number;
   warpsPerBlock: number;
+  /**
+   * 教学抽样（可选，Model-Aware 模式）：内部 GEMM 只详细展示前
+   * blocks 个 Block 与前 kIterations 段 K，其余用汇总事件概括。
+   * 缺省（不传）= 全部展开，V0.2/V0.3 既有行为不变。
+   */
+  sample?: { blocks: number; kIterations: number };
 }
 
 export const DEFAULT_ATTENTION_CONFIG: AttentionConfig = {
@@ -85,7 +91,17 @@ export function emitAttentionEvents(
 ): void {
   const { seqLen, dModel, headDim, tileM, tileN, tileK, numSM, warpsPerBlock } = config;
 
-  const gemmBase = { tileM, tileN, tileK, numSM, warpsPerBlock };
+  const gemmBase = {
+    tileM,
+    tileN,
+    tileK,
+    numSM,
+    warpsPerBlock,
+    // 教学抽样（可选）：缺省时全部展开，V0.2/V0.3 行为不变
+    ...(config.sample
+      ? { sampledBlocks: config.sample.blocks, sampledKIterations: config.sample.kIterations }
+      : {}),
+  };
   const tag = (name: string) => `${prefix}${name}`;
 
   builder.push({

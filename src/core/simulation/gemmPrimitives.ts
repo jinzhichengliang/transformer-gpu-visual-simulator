@@ -39,6 +39,17 @@ export interface GemmPrimitiveConfig {
   /** 可选：覆盖 GEMM_START 的教学文案 */
   startWhat?: string;
   startWhy?: string;
+  /**
+   * 教学抽样（可选）：只详细展示前 sampledBlocks 个 Block 的完整流程，
+   * 其余 Block 用一条汇总事件概括（行为完全相同）。
+   * 缺省（不传）= 全部展开，保持 V0.1-V1.0 既有行为不变。
+   */
+  sampledBlocks?: number;
+  /**
+   * 教学抽样（可选）：每个 Block 内只详细展示前 sampledKIterations 段 K，
+   * 其余 K 段用一条汇总事件概括。缺省 = 全部展开。
+   */
+  sampledKIterations?: number;
 }
 
 function tileRef(tensor: string, tileRow: number, tileCol: number): TileRef {
@@ -95,11 +106,28 @@ export function emitGemmEvents(builder: EventBuilder, config: GemmPrimitiveConfi
   });
 
   // ---------- 逐 Block 执行 ----------
+  const sampleBlocks = config.sampledBlocks;
   for (let blockRow = 0; blockRow < tilesM; blockRow++) {
     for (let blockCol = 0; blockCol < tilesN; blockCol++) {
       const blockId = blockRow * tilesN + blockCol;
       const sm = blockId % numSM;
       const outTile = tileRef(out, blockRow, blockCol);
+
+      // 教学抽样：只详细展示前 sampledBlocks 个 Block，其余行为完全相同，
+      // 用一条汇总事件带过（与 elementwise 原语的抽样机制一致）。
+      if (sampleBlocks !== undefined && blockId >= sampleBlocks) {
+        if (blockId === sampleBlocks) {
+          builder.push({
+            type: 'SYNC',
+            title: `${label}：其余 ${numBlocks - sampleBlocks} 个 Block 并行执行`,
+            what: `Block ${sampleBlocks}～${numBlocks - 1} 以与前面完全相同的方式并行处理各自的输出 Tile（此处为教学抽样，不再逐一展示）。`,
+            why: 'GPU 的并行性体现在大量 Block 同时做同一件事。为控制演示长度，本仿真只详细展示前几个 Block，其余 Block 的执行过程与之完全一致。',
+            operator,
+            metadata: { gemm: { ...gemmMeta, sampledBlocks: sampleBlocks, totalBlocks: numBlocks } },
+          });
+        }
+        continue;
+      }
 
       builder.push({
         type: 'BLOCK_SCHEDULE',
@@ -128,7 +156,24 @@ export function emitGemmEvents(builder: EventBuilder, config: GemmPrimitiveConfi
       }
 
       // ---------- K 维度循环（Tiling 的核心） ----------
+      const sampleK = config.sampledKIterations;
       for (let kIter = 0; kIter < tilesK; kIter++) {
+        // 教学抽样：只详细展示前 sampledKIterations 段 K，其余行为完全相同
+        if (sampleK !== undefined && kIter >= sampleK) {
+          if (kIter === sampleK) {
+            builder.push({
+              type: 'SYNC',
+              title: `${label}：Block ${blockId} 的其余 ${tilesK - sampleK} 段 K 重复累加`,
+              what: `K 段 ${sampleK + 1}～${tilesK} 以与前面完全相同的方式继续加载、计算并累加进 ${outTile.label} 的部分和（此处为教学抽样，不再逐一展示）。`,
+              why: '完整的输出 Tile 需要沿 K 维度累加所有段的部分和。为控制演示长度，本仿真只详细展示前几段，其余段的执行过程与之完全一致。',
+              operator,
+              block: blockId,
+              sm,
+              metadata: { gemm: { ...gemmMeta, sampledKIterations: sampleK, totalKIterations: tilesK } },
+            });
+          }
+          continue;
+        }
         const leftTile = tileRef(left, blockRow, kIter);
         const rightTile = tileRef(right, kIter, blockCol);
         const warp = kIter % warpsPerBlock;

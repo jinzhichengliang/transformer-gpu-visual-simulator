@@ -1,0 +1,66 @@
+.model-selector {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.model-selector-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.model-selector-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.model-selector-input {
+  background: var(--panel-3);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 13px;
+  font-family: var(--sans);
+  min-width: 120px;
+}
+
+.model-selector-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.model-generate-btn {
+  background: var(--accent-strong);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.model-generate-btn:hover {
+  background: var(--accent);
+}
+
+.model-selector-error {
+  font-size: 12px;
+  color: #f85149;
+  align-self: center;
+}
+
+.model-selector-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  align-self: center;
+}

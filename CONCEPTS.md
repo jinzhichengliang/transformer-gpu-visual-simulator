@@ -252,6 +252,45 @@
     激活路径命中自身时展开其子算子；组件不得持有内部展开状态或点击切换。
     这保证 Model 层是"当前事件的纯函数"，与其余视图一致。
 
+## Model-Aware 模式概念规则（V1.1，MUST）
+
+55. **ModelProfile 与具体模型解耦**：统一模型描述通过
+    `ModelProfile`（架构 + 层序列 + 来源元数据 + 保真度）表达；
+    具体模型（DeepSeek V4 Flash/Pro、Kimi K3、GLM-5.3）由独立
+    Adapter 将公开信息映射为 Profile。Schema 本身不得出现特定模型名判断；
+    Profile 不得直接依赖 React 或仿真引擎。
+
+56. **所有关键参数必须携带来源与可信度**：重要参数用 `Traced<T>`
+    表达（value + sources + fidelity）。来源分六类：
+    official / official_repo / technical_report / runtime_repo /
+    inferred / estimated。未公开细节必须标为 inferred/estimated，
+    禁止把推断值标成 verified 或 official。
+
+57. **执行计划由 Planner 生成，模型差异必须传导**：
+    `planExecution(profile, task)` 将 ModelProfile + InferenceTask
+    展开为 OperatorGraph 再投影为 TVIR。相同任务下不同模型必须产生
+    不同的算子图与执行序列（跨模型比较验证守护此约束）。
+    禁止任何"模型只是显示名不同"的退化实现。
+
+58. **Prefill 与 Decode 是两种不同语义**：Prefill 处理整段
+    prompt（seq_len = prompt 长度）；Decode 逐 token 生成，
+    必须读取既有 KV Cache 并写入新 KV。Decode 不得退化为
+    "seq=1 的 prefill"，必须体现 KV Cache 读取语义。
+
+59. **TVIR 仍是唯一词汇表**：Model-Aware 模式不新增事件类型，
+    模型上下文（模型/阶段/层/算子）通过既有 `metadata.model`
+    可选字段承载；旧数据源（无 metadata.model）行为不变。
+
+60. **Semantic Zoom 是纯投影**：同一事件在 Model / Layer /
+    Operator / Kernel / GPU 五个级别显示不同粒度，但锚点
+    （step + type + modelContext）在所有级别保持一致。
+    缩放切换不得改变播放游标位置。
+
+61. **数据可信度标识不得虚假**：本项目是架构仿真器（L5），
+    GPU 时序恒为 Simulated。禁止显示测量级精度的模拟数值
+    （如 "3.427861 μs"）；模拟数值最多保留 2 位有效数字并标注
+    Simulated/Estimated。
+
 ## 允许的教学简化（可接受，但需声明）
 
 - 内存层级以 HBM → L2 → L1 → Shared Memory → Register → Tensor Core 的层级视图呈现。
@@ -333,6 +372,24 @@
   Transformer 是同一 Block 结构的重复堆叠，每层内部数据流与展示的完全相同。
 - **（V1.0）Model 层不感知 KV Cache / 批处理**：结构树展示的是逻辑数据流，
   不包含 KV Cache、批维度、位置编码等推理/训练细节。
+- **（V1.1）大模型参数为公开信息映射**：DeepSeek V4 Flash/Pro、Kimi K3、
+  GLM-5.3 的架构参数来自技术报告与官方博客（2026 年公开信息），
+  未公开细节（如 GLM-5.3 的 hiddenSize）标注为 inferred/estimated，
+  绝不伪装为官方确认值。
+- **（V1.1）层内事件为教学抽样**：为控制 374 层级模型（Kimi K3）的
+  事件规模，层内 GEMM 的 Block/Warp 细节按抽样配置截断，
+  每层完整算子序列保留。**声明**：未展开的 Block/Warp 执行模式
+  与展示的完全相同，不暗示它们以不同方式执行。
+- **（V1.1）Decode 展示前若干步**：长序列生成（如 128 tokens）
+  完整展示前若干步后以语义步概括剩余步骤，每步的 KV Cache
+  读取语义保持一致。
+- **（V1.1）时序为架构仿真估算**：所有模型的执行时序由
+  roofline 风格的解析模型推导（计算量/带宽/延迟），
+  不对应任何真实硬件的实测性能；数值最多保留 2 位有效数字
+  并标注 Simulated/Estimated。
+- **（V1.1）MoE 路由为确定性示意**：Router → Top-K → Dispatch →
+  Expert GEMM → Combine 的流程以确定性方式示意（固定选中前 K 个专家），
+  不模拟真实路由的随机性与负载均衡。
 
 ## 会造成错误理解的简化（禁止）
 
@@ -378,3 +435,19 @@
   来决定高亮——激活路径只能由 event.operator 投影。
 - ❌（V1.0）在 ModelView 中引入点击展开/折叠等交互状态（展开是激活路径的
   纯投影结果，Model 层必须是当前事件的纯函数）。
+- ❌（V1.1）把推断/估算的模型参数标注为 official 或 verified
+  （未公开细节必须诚实标为 inferred/estimated）。
+- ❌（V1.1）让不同模型产生相同的执行序列（模型架构差异必须
+  真实传导到算子图与事件流，跨模型比较验证守护此约束）。
+- ❌（V1.1）把 Decode 实现为"序列长度为 1 的 Prefill"
+  （必须体现 KV Cache 读取与新 KV 写入的语义差异）。
+- ❌（V1.1）新增 TVIR 事件类型来表达模型上下文或 MoE 路由
+  （必须用既有 12 种类型 + metadata.model / metadata.gemm）。
+- ❌（V1.1）显示测量级精度的模拟数值（如 "3.427861 μs"）；
+  模拟数值最多 2 位有效数字并标注 Simulated。
+- ❌（V1.1）让 Semantic Zoom 切换改变播放游标位置或事件锚点
+  （同一事件在不同级别的 step/type/modelContext 必须一致）。
+- ❌（V1.1）在 ModelProfile 或 Adapter 中 import React 或仿真引擎
+  （Profile 是纯数据描述，执行展开由 Planner 完成）。
+- ❌（V1.1）一次性 materialize 全部层的全部事件（大模型必须
+  通过抽样/折叠控制规模，否则 374 层模型会撑爆内存）。

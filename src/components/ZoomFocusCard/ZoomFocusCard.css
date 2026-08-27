@@ -1,0 +1,55 @@
+.zoom-focus-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+
+.zoom-focus-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.zoom-focus-empty-text {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.zoom-focus-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.zoom-focus-level {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.zoom-focus-anchor {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+}
+
+.zoom-focus-primary {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.zoom-focus-details {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}

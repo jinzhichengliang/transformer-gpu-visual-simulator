@@ -46,6 +46,18 @@ import {
   type MultiGpuConfig,
   type ParallelStrategy,
 } from './core/multigpu';
+import {
+  listRegisteredModels,
+  getModelProfile,
+  type ModelProfile,
+} from './core/modelprofile';
+import {
+  planExecution,
+  DEFAULT_INFERENCE_TASK,
+  type InferenceTask,
+} from './core/execution';
+import type { TVIRTrace } from './core/tvir';
+import { type ZoomLevel } from './core/zoom';
 import { ControlBar } from './components/ControlBar/ControlBar';
 import { MatrixView } from './components/MatrixView/MatrixView';
 import { GpuView } from './components/GpuView/GpuView';
@@ -60,6 +72,11 @@ import { PerfPanel } from './components/PerfPanel/PerfPanel';
 import { ArchitecturePlayground } from './components/ArchitecturePlayground/ArchitecturePlayground';
 import { MultiGpuView } from './components/MultiGpuView/MultiGpuView';
 import { ModelView } from './components/ModelView/ModelView';
+import { ModelSelector } from './components/ModelSelector/ModelSelector';
+import { ModelOverview } from './components/ModelOverview/ModelOverview';
+import { ZoomControl } from './components/ZoomControl/ZoomControl';
+import { ZoomFocusCard } from './components/ZoomFocusCard/ZoomFocusCard';
+import { FidelityBadge } from './components/FidelityBadge/FidelityBadge';
 import './App.css';
 
 type SourceMode =
@@ -69,6 +86,7 @@ type SourceMode =
   | 'real-trace'
   | 'sass-trace'
   | 'multigpu'
+  | 'model'
   | 'example';
 
 const SIZE_OPTIONS = [64, 128, 256];
@@ -142,6 +160,59 @@ export default function App() {
 
   // V0.9：Multi-GPU 模式。默认数据并行，可切换 TP/PP/DP。
   const [multiGpuConfig, setMultiGpuConfig] = useState<MultiGpuConfig>(DEFAULT_MULTI_GPU_CONFIG);
+
+  // V1.1：Model-Aware 模式（大模型选择与步进式执行）。
+  // 架构铁律：模型列表来自统一注册表，执行计划由 planExecution 生成 TVIR，
+  // 切换模型只改 state，不残留前一模型状态（Task F1 验收）。
+  const modelList = useMemo(() => listRegisteredModels(), []);
+  const [selectedModelId, setSelectedModelId] = useState<string>('deepseek-v4-flash');
+  const [inferenceTask, setInferenceTask] = useState<InferenceTask>(DEFAULT_INFERENCE_TASK);
+  const selectedProfile = useMemo<ModelProfile | null>(
+    () => getModelProfile(selectedModelId) ?? null,
+    [selectedModelId],
+  );
+
+  // 执行计划：只在用户点击 Generate 或参数/模型变化且已激活 model 数据源时生成。
+  // planExecution 返回 { ok, trace } | { ok: false, error }——失败安全，不抛异常。
+  const [modelTrace, setModelTrace] = useState<TVIRTrace | null>(null);
+  const [modelError, setModelError] = useState<string | null>(null);
+
+  // V1.1 Sprint 8：Semantic Zoom 级别（默认 GPU 级，与原有视图粒度一致）
+  const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('gpu');
+
+  const generateModelExecution = () => {
+    if (!selectedProfile) {
+      setModelError('未找到模型配置');
+      setModelTrace(null);
+      return;
+    }
+    const result = planExecution(selectedProfile, inferenceTask);
+    if (!result.ok) {
+      setModelError(result.error);
+      setModelTrace(null);
+      return;
+    }
+    const validation = validateTVIRTrace(result.trace);
+    if (!validation.valid) {
+      console.error('TVIR validation failed:', validation.errors);
+    }
+    setModelError(null);
+    setModelTrace(result.trace);
+    setSource('model');
+  };
+
+  // 切换模型时清除旧模型的执行计划与错误（避免残留前模型状态）
+  const handleModelChange = (id: string) => {
+    setSelectedModelId(id);
+    setModelTrace(null);
+    setModelError(null);
+  };
+
+  const updateInferenceTask = (patch: Partial<InferenceTask>) => {
+    setInferenceTask((prev) => ({ ...prev, ...patch }));
+    setModelTrace(null); // 参数变化后旧计划失效，需重新 Generate
+    setModelError(null);
+  };
 
   // 上传文件处理（仅在用户主动选择文件时执行）
   const handleTraceFileSelect = (file: File) => {
@@ -276,7 +347,9 @@ export default function App() {
               ? (sassTrace ?? EXAMPLE_TVIR_TRACE)
               : source === 'multigpu'
                 ? multiGpuTrace
-                : EXAMPLE_TVIR_TRACE;
+                : source === 'model'
+                  ? (modelTrace ?? EXAMPLE_TVIR_TRACE)
+                  : EXAMPLE_TVIR_TRACE;
   const playback = usePlayback(trace);
 
   // 数据源/参数变化时，把新 trace 交给 Playback Engine。
@@ -328,6 +401,12 @@ export default function App() {
     } else if (source === 'multigpu') {
       // Multi-GPU 模式：矩阵视图显示一个代表性 GEMM（单卡视角的分片前形状）
       setLastScene({ left: 'X', right: 'W', out: 'Y', M: multiGpuConfig.seqLen, N: multiGpuConfig.dModel, K: multiGpuConfig.dModel, tileM: multiGpuConfig.tileM, tileN: multiGpuConfig.tileN, tileK: multiGpuConfig.tileK });
+    } else if (source === 'model') {
+      // Model-Aware 模式：矩阵场景由当前事件的 metadata.gemm 实时投影驱动，
+      // 初始显示该模型第一个 GEMM 的代表性形状（hidden×hidden）
+      const h = selectedProfile?.architecture.hiddenSize?.value ?? 128;
+      const t = inferenceTask.hardwareProfile.tileSize;
+      setLastScene({ left: 'X', right: 'W', out: 'Y', M: inferenceTask.promptTokens * inferenceTask.batchSize, N: h, K: h, tileM: t, tileN: t, tileK: t });
     } else {
       setLastScene({ left: 'A', right: 'B', out: 'C', M: 4, N: 4, K: 4, tileM: 4, tileN: 4, tileK: 4 });
     }
@@ -352,7 +431,9 @@ export default function App() {
           ? attentionConfig.numSM
           : source === 'block'
             ? blockConfig.numSM
-            : config.numSM;
+            : source === 'model'
+              ? inferenceTask.hardwareProfile.numSM
+              : config.numSM;
   const warpsPerBlock =
     source === 'real-trace'
       ? realTraceHardware.warpsPerBlock
@@ -362,6 +443,8 @@ export default function App() {
           ? attentionConfig.warpsPerBlock
           : source === 'block'
           ? blockConfig.warpsPerBlock
+          : source === 'model'
+          ? inferenceTask.hardwareProfile.warpsPerBlock
           : config.warpsPerBlock;
 
   const smStates = useMemo(
@@ -428,7 +511,7 @@ export default function App() {
         <div className="app-title">
           <h1>Transformer GPU Visual Simulator</h1>
           <span className="app-version">
-            V1.0 · 六层联动 · Model ↔ GPU ↔ Kernel ↔ Memory + Timeline + What/Why
+            V1.1 · Model-Aware · 主流大模型选择与步进式 GPU 执行可视化
           </span>
         </div>
 
@@ -477,6 +560,13 @@ export default function App() {
                 onClick={() => setSource('multigpu')}
               >
                 Multi-GPU
+              </button>
+              <button
+                type="button"
+                className={source === 'model' ? 'active' : ''}
+                onClick={() => setSource('model')}
+              >
+                大模型推理
               </button>
               <button
                 type="button"
@@ -559,6 +649,21 @@ export default function App() {
                 onChange={(v) => updateMultiGpuConfig({ dModel: v })}
               />
             </>
+          ) : null}
+
+          {source === 'model' ? (
+            <div className="config-group model-config">
+              <ModelSelector
+                models={modelList}
+                selectedModelId={selectedModelId}
+                task={inferenceTask}
+                profile={selectedProfile}
+                onModelChange={handleModelChange}
+                onTaskChange={updateInferenceTask}
+                onGenerate={generateModelExecution}
+                error={modelError}
+              />
+            </div>
           ) : null}
 
           {source === 'real-trace' ? (
@@ -664,6 +769,14 @@ export default function App() {
       <main className="app-main">
         <div className="panel-left">
           {source === 'block' ? <ModelView event={playback.event} /> : null}
+          {source === 'model' ? (
+            <>
+              <ZoomControl level={zoomLevel} onChange={setZoomLevel} />
+              <ZoomFocusCard event={playback.event} level={zoomLevel} />
+              <FidelityBadge profile={selectedProfile} />
+              <ModelOverview event={playback.event} profile={selectedProfile} />
+            </>
+          ) : null}
           <MatrixView
             M={effectiveScene.M}
             N={effectiveScene.N}

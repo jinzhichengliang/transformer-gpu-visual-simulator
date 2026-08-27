@@ -18,6 +18,10 @@ Simulation Engine ──► TVIR events ──► Playback Engine ──► Visu
 | `core/tvir` | 定义事件类型与 schema 校验 | 不得包含 UI 样式、不得 import React |
 | `core/simulation` | 生成 TVIREvent[]（教学合理即可） | 不得 import React、不得操作 DOM、不得包含 CSS |
 | `core/playback` | 选择当前事件、控制时间、发布事件 | 不得理解任何 Operator：禁止 `if (event.type === "MMA")` 这类按类型做业务分支 |
+| `core/modelprofile`（V1.1） | 统一模型描述（schema + Adapter 映射） | 不得 import React / 仿真引擎；schema 不得含特定模型名判断；未公开参数不得标 verified |
+| `core/execution`（V1.1） | ModelProfile+Task → OperatorGraph → TVIR | 不得 import React；UI 只经 `planExecution` 入口，不得绕过拼装事件 |
+| `core/zoom`（V1.1） | Semantic Zoom 五级投影 | 不得改变播放游标；锚点（step/type/modelContext）在所有级别恒定 |
+| `core/fidelity`（V1.1） | 数据可信度标识投影 | 不得输出测量级精度的模拟数值；GPU Timing 恒为 Simulated |
 | `components/*`（所有 View） | 只消费当前 TVIR event 渲染 | 不得自己计算 simulation、不得决定下一步、不得维护执行状态 |
 
 ### 明确禁止的调用关系
@@ -26,6 +30,11 @@ Simulation Engine ──► TVIR events ──► Playback Engine ──► Visu
 - ❌ `MatrixView → simulate warp`
 - ❌ `PlaybackEngine → understand Attention/GEMM/Softmax`
 - ❌ UI 组件绕过 Playback 直接 import Simulation Engine
+- ❌（V1.1）`ModelProfile/Adapter → React`（Profile 是纯数据描述）
+- ❌（V1.1）`ModelProfile/Adapter → Simulation Engine`（Adapter 只映射公开信息，不展开事件）
+- ❌（V1.1）UI 绕过 `planExecution` 直接调用模板/原语拼装事件
+- ❌（V1.1）`ZoomControl/ZoomFocusCard → 改变播放游标`（缩放是纯投影）
+- ❌（V1.1）`FidelityBadge → 输出测量级精度数值`（模拟数值最多 2 位有效数字）
 
 ## 关键验收问题（每个版本都要问）
 
@@ -61,7 +70,22 @@ src/
 │   │   ├── commPrimitives.ts      # Ring 集合通信原语（ReduceScatter/AllGather/AllReduce/P2P）
 │   │   └── multiGpuEngine.ts      # DP/TP/PP 策略编排 + 通信原语独立演示
 │   ├── model/               # Model 层（V1.0，模型结构树 + 激活路径投影）
-│   │   └── modelStructure.ts      # Transformer Block 结构树；operator → 模型节点查找
+│   │   ├── modelStructure.ts      # Transformer Block 结构树；operator → 模型节点查找
+│   │   └── modelContext.ts        # 模型执行上下文投影（metadata.model → 面包屑/位置）
+│   ├── modelprofile/        # ModelProfile Framework（V1.1，统一模型描述）
+│   │   ├── types.ts               # ModelProfile schema（架构/层/来源/保真度，模型无关）
+│   │   ├── validation.ts          # schema 校验
+│   │   ├── helpers.ts             # Traced<T>/来源构造辅助
+│   │   ├── genericProfiles.ts     # Generic Dense/MoE Transformer 参考 Profile
+│   │   └── adapters/              # 具体模型 Adapter（公开信息 → ModelProfile 纯映射）
+│   ├── execution/           # Execution Planner（V1.1，Profile+Task → OperatorGraph → TVIR）
+│   │   ├── task.ts                # InferenceTask schema（prefill/decode/prefill_decode）
+│   │   ├── planner.ts             # OperatorGraph 构建（层/算子展开）
+│   │   ├── templates.ts           # 算子模板注册表（GEMM/逐元素/Attention/MoE 展开）
+│   │   └── executor.ts            # Graph → TVIR（教学抽样压缩，控制大模型事件规模）
+│   ├── zoom/                # Semantic Zoom 投影（V1.1，五级粒度 + 锚点一致性）
+│   ├── fidelity/            # Fidelity Badge 投影（V1.1，来源分类 + 禁止虚假精度）
+│   ├── explanation/         # ExplanationRegistry（V1.1，跨模型复用的 What/Why 注册表）
 │   └── playback/            # Playback Engine（只认事件序号与时间）
 ├── components/              # React 视图层，只读 TVIR 状态
 │   ├── ControlBar/
@@ -77,7 +101,12 @@ src/
 │   ├── ArchitecturePlayground/ # 架构实验场（V0.7，硬件滑块 + 基线对比）
 │   ├── InstructionView/     # SASS 指令级视图（V0.8，按 Warp 分组 + 类别着色）
 │   ├── MultiGpuView/        # Multi-GPU 环形拓扑视图（V0.9）
-│   └── ModelView/           # 模型结构树视图（V1.0，激活路径高亮）
+│   ├── ModelView/           # 模型结构树视图（V1.0，激活路径高亮）
+│   ├── ModelSelector/       # 模型选择 + 推理任务配置（V1.1）
+│   ├── ModelOverview/       # 模型执行位置总览（V1.1，面包屑）
+│   ├── ZoomControl/         # Semantic Zoom 级别控制条（V1.1）
+│   ├── ZoomFocusCard/       # 当前缩放级别焦点卡片（V1.1）
+│   └── FidelityBadge/       # 数据可信度标识（V1.1）
 └── state/                   # React 侧的播放状态绑定（usePlayback hook）
 ```
 
@@ -287,6 +316,43 @@ src/
    （CompilerView）↔ GPU（GpuView/TensorCoreView）↔ Kernel（编译链 Kernel 层）
    ↔ Memory（MemoryView）+ Timeline + What/Why（EventExplanation）。六个层面
    由同一 Playback 游标驱动，共享当前 TVIR 事件，层间无直接依赖。
+
+## V1.1 架构约定（Model-Aware · 主流大模型步进式执行可视化）
+
+1. **ModelProfile 是纯数据描述，禁止任何执行逻辑**：`core/modelprofile/`
+   只包含类型定义、校验与"公开信息 → ModelProfile"的映射（Adapter）。
+   Profile 不得 import React、不得 import 仿真引擎、不得自行生成事件。
+   具体模型逻辑全部收敛在 `adapters/` 下，schema（types.ts）本身不得
+   出现特定模型名判断。该约定由 `modelProfile.test.ts` 与
+   `modelAdapters.test.ts` 守护。
+2. **执行展开的唯一路径是 Planner**：
+   `planExecution(profile, task)` → OperatorGraph → TVIR。
+   UI（App.tsx）只调用 `planExecution` 并把结果交给 Playback，
+   不得绕过 Planner 直接调用模板或原语拼装事件。
+   模型间差异（层数/专家数/Attention 类型）必须真实传导到
+   算子图与事件流，由 `crossModelValidation.test.ts` 守护。
+3. **TVIR 词汇表不变**：V1.1 未新增任何事件类型。模型上下文经
+   `metadata.model` 承载，GEMM 细节经 `metadata.gemm` 承载，
+   MoE 路由/Expert 经既有 GEMM/逐元素/访存类型表达。
+   旧数据源（无 metadata.model）行为完全不变，
+   由 `modelContext.test.ts` 的回归用例守护。
+4. **大模型规模由教学抽样压缩控制**：执行器对层内 Block/Warp
+   细节按抽样配置截断（每层完整算子序列保留），禁止一次性
+   materialize 全部层的全部事件。374 层的 Kimi K3 必须能在
+   秒级生成且不撑爆内存，由 `modelAdapters.test.ts` 的规模用例守护。
+5. **Semantic Zoom 是纯投影，锚点恒定**：`core/zoom/` 的
+   `projectZoomFocus()` 对同一事件在五个级别产生不同粒度的焦点，
+   但锚点（step + type + modelContext）在所有级别一致；
+   缩放切换不改变播放游标。由 `semanticZoom.test.ts` 守护。
+6. **数据可信度标识由核心层投影，不写死在组件**：
+   `core/fidelity/` 的 `buildFidelityBadge()` 从 Profile 的来源
+   元数据计算 Badge；GPU Timing 恒为 Simulated（本项目不做实测）。
+   模拟数值经 `formatSimulatedValue()` 压缩到 2 位有效数字，
+   禁止测量级精度。由 `fidelityBadge.test.ts` 守护。
+7. **Golden Trace 锁定执行语义**：`tests/golden/golden_trace.json`
+   是 TinyMoETransformer（2 层/2 头/4 专家/Top-2）的结构指纹快照。
+   任何改变执行语义的修改都会使 `goldenTrace.test.ts` 失败；
+   预期内的语义变更必须显式更新基线并在测试文件中注明原因。
 
 ## 数据可信度规则（来自 §24）
 
